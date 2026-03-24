@@ -1,0 +1,55 @@
+# What a docker-compose.yml does: This file defines services — think of each service as a running container.
+# (we need to add only those services that needs ports to run. E,g. postgres, mlflow).
+
+# Step1: Version: Tells Docker Compose which syntax version to use
+
+# Step2: Define services: services is where all your containers live. 
+# api is the name you give this container.
+
+# Step3: Tell it to build from your Dockerfile
+# look for a Dockerfile in the current directory" and build the image from it.
+
+# Step4: Map ports: maps port 8000 on your machine to port 8000 inside the container. This is how you access the API from your browser.
+
+# Step5: Mount your code as a volume
+# Syncs your local folder with /app inside the container in real time. So when you edit a file locally, the container sees it immediately — no rebuild needed.
+
+# Step6: Set environment variables
+# Makes Python print logs to terminal immediately instead of buffering them
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - GIT_PYTHON_REFRESH=quiet
+
+    depends_on:
+      - mlflow
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.0
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow_artifacts:/mlflow/artifacts
+    command: mlflow server --host 0.0.0.0 --port 5000 --default-artifact-root /mlflow/artifacts
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - api
+      
+  
+
