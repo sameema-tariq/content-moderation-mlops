@@ -20,10 +20,19 @@ MODEL_PATH = Path(os.getenv("MODEL_PATH", str(MODEL_DIR / "model.pkl")))
 # Services
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
 
-# Model artifact management (optional for production deployments)
-MODEL_URL = os.getenv("MODEL_URL")
 MODEL_SHA256 = os.getenv("MODEL_SHA256")
-MODEL_DOWNLOAD_TIMEOUT_S = float(os.getenv("MODEL_DOWNLOAD_TIMEOUT_S", "30"))
+
+# When running behind a reverse proxy/load balancer, configure which proxy IPs are allowed
+# to supply X-Forwarded-For / X-Real-IP. If unset, the app will not trust those headers.
+TRUST_PROXY_HEADERS = os.getenv("TRUST_PROXY_HEADERS", "0").strip() in {"1", "true", "yes", "on"}
+TRUSTED_PROXY_IPS = {
+    ip.strip()
+    for ip in os.getenv("TRUSTED_PROXY_IPS", "").split(",")
+    if ip.strip()
+}
+
+# For production safety, you can require a model checksum to be present (via env or sidecar .sha256 file).
+REQUIRE_MODEL_SHA256 = os.getenv("REQUIRE_MODEL_SHA256", "0").strip() in {"1", "true", "yes", "on"}
 
 # Words that look like stopwords but are strong spam signals — never remove these
 KEEP_WORDS = {

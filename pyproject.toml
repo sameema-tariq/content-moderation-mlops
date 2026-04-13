@@ -22,7 +22,6 @@ dependencies = [
   "pydantic==2.7.1",
   "numpy==1.26.4",
   "slowapi==0.1.9",
-  "evidently==0.4.30",
 ]
 
 [project.optional-dependencies]

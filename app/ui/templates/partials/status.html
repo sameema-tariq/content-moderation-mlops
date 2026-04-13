@@ -1,0 +1,10 @@
+<div class="pill">
+  {% if model_loaded %}
+    <span class="dot good"></span>
+    Model loaded{% if model_version %} ({{ model_version }}){% endif %}
+  {% else %}
+    <span class="dot bad"></span>
+    Model not loaded
+  {% endif %}
+</div>
+

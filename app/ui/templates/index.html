@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-title">Text Moderation Console</div>
+      <div class="brand-sub">Spam / ham classifier â€” FastAPI + scikit-learn</div>
+    </div>
+
+    <div
+      class="pill"
+      hx-get="/ui/status"
+      hx-trigger="load, every 10s"
+      hx-swap="outerHTML"
+    >
+      <span class="dot"></span>
+      Checking statusâ€¦
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Try it</h2>
+      <p class="muted">
+        Paste a message and get a prediction. This UI is served directly by FastAPI (no separate frontend server).
+      </p>
+
+      <form
+        hx-post="/ui/predict"
+        hx-target="#result"
+        hx-swap="innerHTML"
+      >
+        <textarea name="text" placeholder="Type or paste text hereâ€¦" required>{{ sample_text }}</textarea>
+        <div class="row">
+          <button class="btn primary" type="submit">Predict</button>
+          <span class="small">Tip: press <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Result</h2>
+      <div id="result" class="result">
+        <div class="small muted">Submit text to see label and confidence.</div>
+      </div>
+
+      <div class="footer">
+        <a href="/docs" target="_blank" rel="noreferrer">OpenAPI docs</a>
+        <a href="/health" target="_blank" rel="noreferrer">Health JSON</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        const form = document.querySelector("form[hx-post='/ui/predict']");
+        if (form) form.requestSubmit();
+      }
+    });
+  </script>
+{% endblock %}
+

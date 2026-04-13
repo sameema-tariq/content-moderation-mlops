@@ -67,17 +67,19 @@ cd content-moderation-mlops
 
 ## Production notes (model artifact)
 
-In real deployments you typically **do not bake the model into the image**. Instead:
+This project uses **option 1**: the model file (`model/model.pkl`) is expected to be present in the image/container.
 
-- set `MODEL_URL` to a trusted location containing `model.pkl`
-- set `MODEL_SHA256` to verify the model file before loading
+To update the model in production:
 
-When you train locally, the pipeline writes a checksum file next to the model:
+1. Run the training pipeline to produce a new `model/model.pkl`
+2. Rebuild and redeploy the Docker image
 
-- `model/model.pkl.sha256`
+Optional: set `MODEL_SHA256` to verify the model file before loading (the pipeline writes
+`model/model.pkl.sha256` when it trains).
 
 ## API endpoints
 
+- `GET /` (UI): minimal web UI for trying predictions
 - `GET /health` (liveness): always `200` when the API process is up
 - `GET /ready` (readiness): `200` only when the model is loaded
 - `POST /predict`: returns `503` if the model is not loaded

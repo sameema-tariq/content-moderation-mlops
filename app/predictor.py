@@ -3,9 +3,9 @@
 import pickle
 from pathlib import Path
 
-from app.artifacts import ensure_model_present, verify_model_sha256
+from app.artifacts import verify_model_sha256
 from app.logger import get_logger
-from config.settings import MODEL_DOWNLOAD_TIMEOUT_S, MODEL_PATH, MODEL_SHA256, MODEL_URL
+from config.settings import MODEL_PATH, MODEL_SHA256, REQUIRE_MODEL_SHA256
 
 logger = get_logger(__name__)
 
@@ -15,13 +15,25 @@ class Predictor:
 
     def __init__(self):
         model_path = Path(MODEL_PATH)
-        ensure_model_present(model_path, model_url=MODEL_URL, timeout_s=MODEL_DOWNLOAD_TIMEOUT_S)
         if not model_path.exists():
             raise FileNotFoundError(
                 f"Model not found at {MODEL_PATH}. "
-                "Run the training pipeline first or set MODEL_URL."
+                "Run the training pipeline first to create model/model.pkl."
             )
-        verify_model_sha256(model_path, expected_sha256=MODEL_SHA256)
+
+        expected_sha256 = MODEL_SHA256
+        if not expected_sha256:
+            sha_path = model_path.with_suffix(model_path.suffix + ".sha256")
+            if sha_path.exists():
+                expected_sha256 = sha_path.read_text(encoding="utf-8").strip().split()[0]
+
+        if REQUIRE_MODEL_SHA256 and not expected_sha256:
+            raise ValueError(
+                "Model checksum is required. Set MODEL_SHA256 or include "
+                f"{model_path.name}.sha256 next to the model."
+            )
+
+        verify_model_sha256(model_path, expected_sha256=expected_sha256)
 
         with open(model_path, "rb") as f:
             bundle = pickle.load(f)

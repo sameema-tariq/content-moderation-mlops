@@ -1,0 +1,14 @@
+<div class="result">
+  <div class="result-row">
+    <div class="badge {{ label }}">
+      <span class="dot {% if label == 'spam' %}bad{% else %}good{% endif %}"></span>
+      {{ label | upper }}
+    </div>
+    <div class="small">Confidence: <strong>{{ confidence }}</strong></div>
+  </div>
+
+  {% if model_version %}
+    <div class="small muted">Model version: {{ model_version }}</div>
+  {% endif %}
+</div>
+

@@ -12,7 +12,6 @@ env/
 
 # Local artifacts (keep runtime images clean)
 data/
-model/
 mlflow_artifacts/
 
 # Docs/dev-only

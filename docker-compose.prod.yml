@@ -6,19 +6,23 @@ services:
         INSTALL_DEV: "0"
     ports:
       - "8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    mem_limit: 512m
+    cpus: "1.0"
+    restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
       - LOG_LEVEL=info
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-    depends_on:
-      - mlflow
+      - REQUIRE_MODEL_SHA256=1
+      - TRUST_PROXY_HEADERS=1
+      - TRUSTED_PROXY_IPS=1.2.3.4
 
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.13.0
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./mlflow_artifacts:/mlflow/artifacts
-    command: mlflow server --host 0.0.0.0 --port 5000 --default-artifact-root /mlflow/artifacts
-    environment:
-      - PYTHONUNBUFFERED=1
+      # In production, point this to a private/managed MLflow if you need tracking:
+      # - MLFLOW_TRACKING_URI=http(s)://<internal-mlflow-host>:5000
